@@ -6,5 +6,5 @@ Some tools for raw signal data preprocessing and heartbeat detection
 ### Install dependencies
 
 ```bash
-pip install -r requirements/requirements.txt
+pip install -r requirements/requirements.txt --extra-index-url https://download.pytorch.org/whl/cu116
 ```
