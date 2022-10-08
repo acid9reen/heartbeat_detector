@@ -1,7 +1,25 @@
 import argparse
+import logging
 from typing import Callable
 
 from src.generate_dataset import DatasetGenerator
+
+
+LOG_FILE = 'debug.log'
+
+
+# Logger configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+    ],
+)
+
+# Now you can use same config for other files triggered by this module
+# Just paste the line below into desired module
+logger = logging.getLogger(__name__)
 
 
 Secs = int
