@@ -207,6 +207,8 @@ tomli==2.0.1
     #   pep517
 torch==1.12.1
     # via -r .\requirements\requirements.in
+torchinfo==1.7.1
+    # via -r .\requirements\requirements.in
 tornado==6.2
     # via
     #   ipykernel

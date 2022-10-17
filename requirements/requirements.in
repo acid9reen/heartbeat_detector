@@ -2,3 +2,4 @@ matplotlib
 notebook
 numpy
 torch
+torchinfo
