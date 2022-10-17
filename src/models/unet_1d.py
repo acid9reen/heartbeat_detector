@@ -51,7 +51,7 @@ class UNetUp(nn.Module):
         )
         self._model = UNetConv(in_channels + in_channels_skip, out_channels)
 
-    def forward(self, X_skip: torch.Tensor, X: torch.Tensor) -> None:
+    def forward(self, X_skip: torch.Tensor, X: torch.Tensor) -> torch.Tensor:
         X = self._up(X)
         diff = X_skip.size()[2] - X.size()[2]
         X = F.pad(X, (diff // 2, diff - diff // 2))
