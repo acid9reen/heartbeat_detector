@@ -26,6 +26,9 @@ Secs = int
 
 
 class ParserNamespace(argparse.Namespace):
+    # <<---- General options ---->>
+    random_seed: int = 420
+
     # <<---- Dataset generator options ---->>
     trim_by: Secs
     limit: int
@@ -41,7 +44,12 @@ def parse_args() -> ParserNamespace:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # Generate dataset arguments
+    # <<---- General arguments ---->>
+    parser.add_argument(
+        '--random_seed', help='Fixed random seed',
+    )
+
+    # <<---- Generate dataset arguments ---->>
     generate_dataset_parser = subparsers.add_parser(
         'generate_dataset',
         help='Script to generate dataset from .npy and .json files',
