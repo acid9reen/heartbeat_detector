@@ -26,9 +26,11 @@ Secs = int
 
 
 class ParserNamespace(argparse.Namespace):
+    # <<---- Dataset generator options ---->>
     trim_by: Secs
     limit: int
     raw_data_root: str
+    output_folder: str = './dataset'
 
     # Store function in context of used subparser
     # NOTE: You need to set default for this field for any subparser you add!
@@ -61,6 +63,10 @@ def parse_args() -> ParserNamespace:
         '--raw_data_root', help='Path to files to generate dataset from',
     )
 
+    generate_dataset_parser.add_argument(
+        '--output_folder', help='Location to store generated dataset',
+    )
+
     generate_dataset_parser.set_defaults(action=generate_dataset)
 
     return parser.parse_args(namespace=ParserNamespace())
@@ -77,6 +83,7 @@ def generate_dataset(args: ParserNamespace) -> None:
         args.raw_data_root,
         args.trim_by,
         args.limit,
+        args.output_folder,
     )
 
 
