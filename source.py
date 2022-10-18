@@ -1,5 +1,6 @@
 import argparse
 import logging
+import random
 from typing import Callable
 
 from src.generate_dataset import DatasetGenerator
@@ -95,7 +96,19 @@ def generate_dataset(args: ParserNamespace) -> None:
     )
 
 
+def seed_everything(seed: int) -> None:
+    """Fix seed for random generators
+
+    Args:
+        seed (int): fixed seed
+    """
+
+    random.seed(seed)
+    logger.info(f'Fix random seed with value: {seed}!')
+
+
 def main(args: ParserNamespace) -> int:
+    seed_everything(args.random_seed)
     args.action(args)
 
     return 0
