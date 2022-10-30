@@ -1,6 +1,7 @@
 import json
 import logging
 import random
+from functools import partial
 from pathlib import Path
 
 from .selector import SelectInstruction
@@ -26,6 +27,26 @@ def _get_labels_per_channel_peaks_length(
     return label_path_peaks_length
 
 
+def _get_signal_path_from_label_path(label_path: Path, signals_location: str) -> Path:
+    # Initial implementation for the following dataset structure:
+    # dataset_root
+    # │
+    # └-X
+    # │ └-X_<...>.npy
+    # │ └-X_<...>.npy
+    # │ ...
+    # │
+    # └-Y
+    #   └-Y_<...>.json
+    #   └-Y_<...>.json
+    #   ...
+
+    label_filename = label_path.stem
+    signal_filaname = ''.join(['X', label_filename[1:], '.npy'])
+
+    return label_path.parent.parent / signals_location / signal_filaname
+
+
 class DatasetGenerator:
     SIGNALS_LOCATION = 'X'
     LABELS_LOCATION = 'Y'
@@ -47,25 +68,10 @@ class DatasetGenerator:
         self.labels_per_channel_peaks_length = _get_labels_per_channel_peaks_length(
             self.label_paths,
         )
-
-    def _get_signal_path_from_label_path(self, label_path: Path) -> Path:
-        # Initial implementation for the following dataset structure:
-        # dataset_root
-        # │
-        # └-X
-        # │ └-X_<...>.npy
-        # │ └-X_<...>.npy
-        # │ ...
-        # │
-        # └-Y
-        #   └-Y_<...>.json
-        #   └-Y_<...>.json
-        #   ...
-
-        label_filename = label_path.stem
-        signal_filaname = ''.join(['X', label_filename[1:], '.npy'])
-
-        return label_path.parent.parent / self.SIGNALS_LOCATION / signal_filaname
+        self.get_signal_path_from_label_path = partial(
+            _get_signal_path_from_label_path,
+            signals_location=self.SIGNALS_LOCATION,
+        )
 
     def _get_labels_files(self) -> list[Path]:
         labels_path = self.raw_data_path / self.LABELS_LOCATION
