@@ -12,7 +12,7 @@ class SelectInstruction(NamedTuple):
     shift: int
 
 
-class SelectedResult(NamedTuple):
+class SelectResult(NamedTuple):
     selected_signal: np.ndarray
     selected_label: np.ndarray
     peak_quantity: int
@@ -33,7 +33,7 @@ class Selector:
             signal: np.ndarray,
             label: list[int],
             select_instruction: SelectInstruction,
-    ) -> SelectedResult:
+    ) -> SelectResult:
 
         peak = label[select_instruction.peak_index]
 
@@ -67,7 +67,7 @@ class Selector:
             f'_{select_instruction.shift}'
         )
 
-        return SelectedResult(
+        return SelectResult(
             selected_signal,
             selected_label,
             len(selected_peaks),
