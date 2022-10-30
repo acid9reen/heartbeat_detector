@@ -12,6 +12,7 @@ class SelectInstruction(NamedTuple):
     peak_index: int
     shift: int
 
+
 class SelectedResult(NamedTuple):
     selected_signal: np.ndarray
     selected_labels: np.ndarray
@@ -19,12 +20,11 @@ class SelectedResult(NamedTuple):
     sample_file_name: str
 
 
-
 class Selector:
     def __init__(
-            self, 
+            self,
             label_transform: Callable[[list[int]], np.ndarray],
-            sample_length: int
+            sample_length: int,
     ) -> None:
         self.label_transform = label_transform
         self.sample_length = sample_length
@@ -36,7 +36,7 @@ class Selector:
             select_instruction: SelectInstruction,
     ) -> Any:
 
-        peak = label[select_instruction.peak_index] 
+        peak = label[select_instruction.peak_index]
 
         max_index = len(signal) - 1
 
@@ -45,10 +45,10 @@ class Selector:
 
         if (length := right_index - left_index) < self.sample_length:
             raise ValueError(f'Too short signal length: {length}, while desired length {self.sample_length}')
-        
+
         selected_signal = signal[left_index:right_index]
 
-        selected_peaks = list(filter(lambda x: left_index < x < right_index , label))
+        selected_peaks = list(filter(lambda x: left_index < x < right_index, label))
 
         selected_labels = np.zeros(len(selected_signal))
 
@@ -64,6 +64,5 @@ class Selector:
             selected_signal,
             selected_labels,
             len(selected_peaks),
-            sample_file_name
+            sample_file_name,
         )
-
