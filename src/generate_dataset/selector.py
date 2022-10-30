@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any
 from typing import Callable
 from typing import NamedTuple
 
@@ -34,7 +33,7 @@ class Selector:
             signal: np.ndarray,
             label: list[int],
             select_instruction: SelectInstruction,
-    ) -> Any:
+    ) -> SelectedResult:
 
         peak = label[select_instruction.peak_index]
 
