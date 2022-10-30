@@ -53,7 +53,7 @@ class Selector:
 
         selected_signal = signal[left_index:right_index]
 
-        selected_peaks = list(filter(lambda x: left_index < x < right_index, label))
+        selected_peaks = list(filter(lambda x: left_index <= x <= right_index, label))
 
         selected_label = np.zeros(len(selected_signal))
 
