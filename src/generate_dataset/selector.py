@@ -41,10 +41,16 @@ class Selector:
         max_index = len(signal) - 1
 
         left_index = max(0, peak - select_instruction.shift)
-        right_index = min(max_index, peak - select_instruction.shift + self.sample_length)
+        right_index = min(
+            max_index,
+            peak - select_instruction.shift + self.sample_length,
+        )
 
         if (length := right_index - left_index) < self.sample_length:
-            raise ValueError(f'Too short signal length: {length}, while desired length {self.sample_length}')
+            raise ValueError(
+                f'Too short signal length: {length}, '
+                f'while desired length {self.sample_length}',
+            )
 
         selected_signal = signal[left_index:right_index]
 
