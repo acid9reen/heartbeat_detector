@@ -14,7 +14,7 @@ class SelectInstruction(NamedTuple):
 
 class SelectedResult(NamedTuple):
     selected_signal: np.ndarray
-    selected_labels: np.ndarray
+    selected_label: np.ndarray
     peak_quantity: int
     sample_file_name: str
 
@@ -55,10 +55,10 @@ class Selector:
 
         selected_peaks = list(filter(lambda x: left_index < x < right_index, label))
 
-        selected_labels = np.zeros(len(selected_signal))
+        selected_label = np.zeros(len(selected_signal))
 
         for selected_peak in selected_peaks:
-            selected_labels[selected_peak] = 1
+            selected_label[selected_peak] = 1
 
         sample_file_name = (
             f'{select_instruction.label_path.stem}'
@@ -69,7 +69,7 @@ class Selector:
 
         return SelectedResult(
             selected_signal,
-            selected_labels,
+            selected_label,
             len(selected_peaks),
             sample_file_name,
         )
