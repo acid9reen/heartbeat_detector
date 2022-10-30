@@ -11,7 +11,7 @@ from .selector import Selector
 from .selector import SelectResult
 
 
-class RawDataReader:
+class RawDataProcessor:
     def __init__(
             self,
             signal_filename_from_label_getter: Callable[[Path], Path],
