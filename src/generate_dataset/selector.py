@@ -62,8 +62,10 @@ class Selector:
             selected_labels[selected_peak] = 1
 
         sample_file_name = (
-            f'{select_instruction.label_path.stem}_{select_instruction.channel_index}'
-            f'_{select_instruction.peak_index}_{select_instruction.shift}'
+            f'{select_instruction.label_path.stem}'
+            f'_{select_instruction.channel_index}'
+            f'_{select_instruction.peak_index}'
+            f'_{select_instruction.shift}'
         )
 
         return SelectedResult(
