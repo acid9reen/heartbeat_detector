@@ -1,10 +1,15 @@
+import csv
 import json
 import logging
+import os
 import random
 from functools import partial
 from pathlib import Path
 
+from .raw_data_processor import RawDataProcessor
 from .selector import SelectInstruction
+from .selector import Selector
+from .selector import SelectResult
 
 
 logger = logging.getLogger(__name__)
@@ -106,3 +111,44 @@ class DatasetGenerator:
             select_instructions.append(select_instruction)
 
         return select_instructions
+
+    def _save_select_results(self, select_results: list[SelectResult]) -> None:
+        header = ['x_file_path', 'y_file_path', 'num_peaks']
+
+        with open(os.path.join(self.out_foder_path, 'dataset.csv'), 'w') as out:
+            csv_writer = csv.writer(
+                out,
+                delimiter=',',
+                quotechar='"',
+                quoting=csv.QUOTE_MINIMAL,
+                lineterminator='\n',
+            )
+
+            csv_writer.writerow(header)
+
+            for select_result in select_results:
+                csv_writer.writerow(select_result)
+
+    def generate(self) -> None:
+        select_instructions = self._get_select_instructions()
+        selector = Selector(
+            self.sample_length,
+            self.out_foder_path,
+            'x',
+            'y',
+        )
+
+        signal_file_name_from_label_name_getter = partial(
+            _get_signal_path_from_label_path,
+            signals_location=self.SIGNALS_LOCATION,
+        )
+
+        data_processor = RawDataProcessor(
+            signal_file_name_from_label_name_getter,
+            select_instructions,
+            selector,
+        )
+
+        select_results = data_processor.process()
+
+        self._save_select_results(select_results)

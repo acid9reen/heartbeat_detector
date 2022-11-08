@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable
 
 import numpy as np
+from tqdm import tqdm
 
 from .selector import SelectInstruction
 from .selector import Selector
@@ -58,9 +59,11 @@ class RawDataProcessor:
         select_results: list[SelectResult] = []
 
         with mp.Pool(num_processes) as pool:
-            for select_result in pool.imap_unordered(
-                self._process_label_file,
-                self.file_select_instructions.items(),
+            for select_result in tqdm(
+                pool.imap_unordered(
+                    self._process_label_file,
+                    self.file_select_instructions.items(),
+                ), total=len(self.file_select_instructions), desc='Processing label files',
             ):
                 select_results.extend(select_result)
 

@@ -88,12 +88,14 @@ def generate_dataset(args: ParserNamespace) -> None:
         args (ParserNamespace): Args for dataset generation
     """
 
-    DatasetGenerator(
+    dataset_generator = DatasetGenerator(
         args.raw_data_root,
         args.trim_by,
         args.limit,
         args.output_folder,
     )
+
+    dataset_generator.generate()
 
 
 def seed_everything(seed: int) -> None:
