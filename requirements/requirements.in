@@ -3,3 +3,4 @@ notebook
 numpy
 torch
 torchinfo
+tqdm

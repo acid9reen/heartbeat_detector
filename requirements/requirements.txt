@@ -21,7 +21,9 @@ bleach==5.0.1
 cffi==1.15.1
     # via argon2-cffi-bindings
 colorama==0.4.5
-    # via ipython
+    # via
+    #   ipython
+    #   tqdm
 contourpy==1.0.5
     # via matplotlib
 cycler==0.11.0
@@ -173,6 +175,8 @@ tornado==6.2
     #   jupyter-client
     #   notebook
     #   terminado
+tqdm==4.64.1
+    # via -r .\requirements\requirements.in
 traitlets==5.4.0
     # via
     #   ipykernel
