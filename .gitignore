@@ -161,3 +161,10 @@ cython_debug/
 
 # VSCode
 .vscode/
+
+# Logs
+*.log
+
+# Generated files
+*.npy
+*.csv
