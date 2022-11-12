@@ -4,6 +4,9 @@ from typing import NamedTuple
 
 import numpy as np
 
+from .label_transformers import IdentityTransformer
+from .label_transformers import LabelTransformer
+
 
 class SelectInstruction(NamedTuple):
     label_path: Path
@@ -25,8 +28,10 @@ class Selector:
             out_folder_path: str = 'generated_data',
             processed_xs_out_folder: str = 'x',
             processed_ys_out_folder: str = 'y',
+            label_transformer: LabelTransformer = IdentityTransformer(),
     ) -> None:
         self.sample_length = sample_length
+        self.label_transformer = label_transformer
 
         self.processed_xs_path = os.path.join(out_folder_path, processed_xs_out_folder)
         self.processed_ys_path = os.path.join(out_folder_path, processed_ys_out_folder)
@@ -65,12 +70,6 @@ class Selector:
             right_index = peak + self.sample_length - select_instruction.shift - 1
             left_index = peak - select_instruction.shift
 
-        # if (length := right_index - left_index + 1) != self.sample_length:
-        #     raise ValueError(
-        #         f'Too short signal length: {length}, '
-        #         f'while desired length {self.sample_length}',
-        #     )
-
         selected_signal = signal[left_index:right_index + 1]
         selected_peaks = list(filter(lambda x: left_index <= x <= right_index, label))
 
@@ -79,15 +78,17 @@ class Selector:
         for selected_peak in selected_peaks:
             selected_label[selected_peak - left_index] = 1
 
+        transformed_label = self.label_transformer.transform(selected_label)
+
         sample_file_name = (
             f'{select_instruction.label_path.stem}'
             f'_{select_instruction.channel_index}'
-            f'_{select_instruction.peak_index}'
-            f'_{select_instruction.shift}'
+            f'_{left_index}'
+            f'_{right_index}'
             f'.npy'
         )
 
-        self._save(selected_signal, selected_label, sample_file_name)
+        self._save(selected_signal, transformed_label, sample_file_name)
 
         return SelectResult(
             os.path.join(self.processed_xs_path, sample_file_name),
