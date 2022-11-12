@@ -124,32 +124,16 @@ class HeartbeatDataloaders(object):
 
         return train_set, validation_set, test_set
 
-    def _get_train_dataloader(self) -> DataLoader:
+    def _get_dataloader(self, signals: tuple[str], labels: tuple[str]) -> DataLoader:
         return self.pre_tuned_dataloader(
-            HeartbeatDataset(
-                self.signals_train, self.labels_train,
-            ),
-        )
-
-    def _get_validation_dataloader(self) -> DataLoader:
-        return self.pre_tuned_dataloader(
-            HeartbeatDataset(
-                self.signals_validation, self.labels_validation,
-            ),
-        )
-
-    def _get_test_dataloader(self) -> DataLoader:
-        return self.pre_tuned_dataloader(
-            HeartbeatDataset(
-                self.signals_test, self.labels_test,
-            ),
+            HeartbeatDataset(signals, labels),
         )
 
     def get_train_validation_test_dataloaders(
             self,
     ) -> tuple[DataLoader, DataLoader, DataLoader]:
         return (
-            self._get_train_dataloader(),
-            self._get_validation_dataloader(),
-            self._get_test_dataloader(),
+            self._get_dataloader(self.signals_train, self.labels_train),
+            self._get_dataloader(self.signals_validation, self.labels_validation),
+            self._get_dataloader(self.signals_test, self.labels_test),
         )
