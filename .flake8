@@ -17,5 +17,7 @@ exclude =
 max-complexity = 10
 max_line_length = 120
 
+ignore = W605
+
 # Ignore unused imports in __init__.py files
 per-file-ignores = __init__.py:F401
