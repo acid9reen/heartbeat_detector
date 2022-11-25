@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Any
 from typing import Generator
 from typing import Literal
@@ -87,7 +86,7 @@ class Trainer(object):
         with torch.no_grad():
             for signals, labels in tqdm(
                     self.validation_dataloader,
-                    desc='Train batches',
+                    desc='Validation batches',
                     total=len(self.validation_dataloader),
             ):
                 self.optimizer.zero_grad()
@@ -114,16 +113,3 @@ class Trainer(object):
             logger.info(f'Epoch: {epoch_no}, validation loss: {validation_mean_loss:.4f}')
 
             yield self.model
-
-
-class ModelSaver(object):
-    def __init__(self, out_folder: str, model_name: str) -> None:
-        self.save_path_template = os.path.join(out_folder, model_name)
-
-        os.makedirs(out_folder, exist_ok=True)
-
-    def save(self, model: nn.Module, epoch_no: int) -> None:
-        epoch_specific_addon = f'_epoch_{epoch_no:03d}.pth'
-        torch.save(model, self.save_path_template + epoch_specific_addon)
-
-        # TODO: add as artifact to metric logger
