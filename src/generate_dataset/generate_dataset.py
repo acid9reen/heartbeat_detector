@@ -6,6 +6,7 @@ import random
 from functools import partial
 from pathlib import Path
 
+from .label_transformers import LabelTransformer
 from .raw_data_processor import RawDataProcessor
 from .selector import SelectInstruction
 from .selector import Selector
@@ -129,13 +130,14 @@ class DatasetGenerator:
             for select_result in select_results:
                 csv_writer.writerow(select_result)
 
-    def generate(self) -> None:
+    def generate(self, label_transformer: LabelTransformer) -> None:
         select_instructions = self._get_select_instructions()
         selector = Selector(
             self.sample_length,
             self.out_foder_path,
             'x',
             'y',
+            label_transformer,
         )
 
         signal_file_name_from_label_name_getter = partial(

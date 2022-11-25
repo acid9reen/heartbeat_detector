@@ -10,6 +10,9 @@ import torch
 
 from src.configs.train_config import read_config
 from src.generate_dataset import DatasetGenerator
+from src.generate_dataset.label_transformers import IdentityTransformer
+from src.generate_dataset.label_transformers import TriangleTransformer
+from src.generate_dataset.label_transformers import WaveTransformer
 from src.train.train import train
 
 
@@ -31,6 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 Secs = int
+
+TRANSFORM_KEYS = {
+    'identity': IdentityTransformer(),
+    'sin': WaveTransformer(20),
+    'abs': TriangleTransformer(20),
+}
 
 
 class ParserNamespace(argparse.Namespace):
@@ -76,6 +85,13 @@ def parse_args() -> ParserNamespace:
     )
 
     generate_dataset_parser.add_argument(
+        '--label_transform',
+        type=str,
+        choices=['identity', 'sin', 'abs'],
+        help='Type of label transform',
+    )
+
+    generate_dataset_parser.add_argument(
         '--raw_data_root', help='Path to files to generate dataset from',
     )
 
@@ -109,7 +125,7 @@ def generate_dataset(args: ParserNamespace) -> None:
         args.output_folder,
     )
 
-    dataset_generator.generate()
+    dataset_generator.generate(TRANSFORM_KEYS[args.label_transform])
 
 
 def train_model(args: ParserNamespace) -> None:
