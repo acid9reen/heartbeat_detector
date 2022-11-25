@@ -168,3 +168,4 @@ cython_debug/
 # Generated files
 *.npy
 *.csv
+*.pth
