@@ -22,10 +22,10 @@ loss_config:
   loss_name: mse
 
 output_config:
-  checkpoints_folder: checkpoints
+  out_folder: out
 
 model_name: 'unet1d'
 
-epochs_num: 50
+epochs_num: 3
 save_step_size: 1
 device: cuda

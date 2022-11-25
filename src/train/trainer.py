@@ -3,6 +3,7 @@ from typing import Any
 from typing import Generator
 from typing import Literal
 
+import mlflow
 import numpy as np
 import torch
 from torch import nn
@@ -70,10 +71,10 @@ class Trainer(object):
 
             self.optimizer.step()
 
-            mean_loss = np.mean(loss.cpu().detach().numpy())
-            running_loss += mean_loss.item()
+            mean_loss = np.mean(loss.cpu().detach().numpy()).item()
+            running_loss += mean_loss
 
-            # TODO: add batch loss logging
+            mlflow.log_metric('train_batch_loss', mean_loss, step=self.train_batch_no)
 
         self.scheduler.step()
 
@@ -97,10 +98,12 @@ class Trainer(object):
                 preds = self.model(signals)
                 loss = self.loss(preds, labels)
 
-                mean_loss = np.mean(loss.cpu().detach().numpy())
-                running_loss += mean_loss.item()
+                mean_loss = np.mean(loss.cpu().detach().numpy()).item()
+                running_loss += mean_loss
 
-                # TODO: add batch loss logging
+                mlflow.log_metric(
+                    'validation_batch_loss', mean_loss, step=self.validation_batch_no,
+                )
 
         return running_loss / len(self.validation_dataloader)
 
@@ -111,5 +114,12 @@ class Trainer(object):
 
             logger.info(f'Epoch: {epoch_no}, train loss: {train_mean_loss:.4f}')
             logger.info(f'Epoch: {epoch_no}, validation loss: {validation_mean_loss:.4f}')
+
+            mlflow.log_metrics(
+                {
+                    'train_loss': train_mean_loss,
+                    'validation_loss': validation_mean_loss,
+                }, step=epoch_no,
+            )
 
             yield self.model

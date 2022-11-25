@@ -52,7 +52,7 @@ def train(config: TrainConfig) -> None:
     epochs_num = config.epochs_num
 
     model_saver = ModelSaver(
-        config.output_config.checkpoints_folder,
+        config.output_config.out_folder,
         config.model_name,
     )
 

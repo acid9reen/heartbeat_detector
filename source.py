@@ -1,7 +1,12 @@
 import argparse
 import logging
+import os
 import random
 from typing import Callable
+
+import mlflow
+import numpy as np
+import torch
 
 from src.configs.train_config import read_config
 from src.generate_dataset import DatasetGenerator
@@ -95,6 +100,8 @@ def generate_dataset(args: ParserNamespace) -> None:
         args (ParserNamespace): Args for dataset generation
     """
 
+    seed_everything(args.random_seed)
+
     dataset_generator = DatasetGenerator(
         args.raw_data_root,
         args.trim_by,
@@ -107,7 +114,11 @@ def generate_dataset(args: ParserNamespace) -> None:
 
 def train_model(args: ParserNamespace) -> None:
     config = read_config(args.train_config_path)
-    train(config)
+
+    with mlflow.start_run():
+        seed_everything(args.random_seed)
+        mlflow.log_params(config.dict_repr)
+        train(config)
 
 
 def seed_everything(seed: int) -> None:
@@ -118,11 +129,17 @@ def seed_everything(seed: int) -> None:
     """
 
     random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True  # type: ignore
+    torch.backends.cudnn.benchmark = True  # type: ignore
+
     logger.info(f'Fix random seed with value: {seed}!')
 
 
 def main(args: ParserNamespace) -> int:
-    seed_everything(args.random_seed)
     args.action(args)
 
     return 0

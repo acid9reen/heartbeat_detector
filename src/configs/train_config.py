@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Literal
 
 import yaml
@@ -27,7 +28,7 @@ class LossConfig(BaseModel):
 
 
 class OutputConfig(BaseModel):
-    checkpoints_folder: str
+    out_folder: str
 
 
 class TrainConfig(BaseModel):
@@ -40,6 +41,18 @@ class TrainConfig(BaseModel):
     save_step_size: int
     output_config: OutputConfig
     device: Literal['cpu', 'cuda']
+
+    @property
+    def dict_repr(self) -> dict[str, Any]:
+        return {
+            'model_name': self.model_name,
+            'optimizer': self.optimizer_config.optimizer_name,
+            'learning_rate': self.optimizer_config.learning_rate,
+            'weight_decay': self.optimizer_config.weight_decay,
+            'scheduler_milestones': self.scheduler_config.milestones,
+            'scheduler_gamma': self.scheduler_config.gamma,
+            'loss': self.loss_config.loss_name,
+        }
 
 
 def read_config(config_path: str) -> TrainConfig:
