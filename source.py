@@ -3,7 +3,9 @@ import logging
 import random
 from typing import Callable
 
+from src.configs.train_config import read_config
 from src.generate_dataset import DatasetGenerator
+from src.train.train import train
 
 
 LOG_FILE = 'debug.log'
@@ -76,6 +78,11 @@ def parse_args() -> ParserNamespace:
         '--output_folder', help='Location to store generated dataset',
     )
 
+    train_model_parser = subparsers.add_parser('train_model', help='Script to train model')
+    train_model_parser.add_argument('train_config_path', help='Path to train config .yaml file')
+
+    train_model_parser.set_defaults(action=train_model)
+
     generate_dataset_parser.set_defaults(action=generate_dataset)
 
     return parser.parse_args(namespace=ParserNamespace())
@@ -96,6 +103,11 @@ def generate_dataset(args: ParserNamespace) -> None:
     )
 
     dataset_generator.generate()
+
+
+def train_model(args: ParserNamespace) -> None:
+    config = read_config(args.train_config_path)
+    train(config)
 
 
 def seed_everything(seed: int) -> None:
