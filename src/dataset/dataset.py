@@ -52,8 +52,8 @@ class HeartbeatDataset(Dataset):
         return len(self.signal_files)
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
-        signal = torch.from_numpy(np.load(self.signal_files[index]))
-        label = torch.from_numpy(np.load(self.label_files[index]))
+        signal = torch.from_numpy(np.array([np.load(self.signal_files[index])], dtype=np.float32))
+        label = torch.from_numpy(np.array([np.load(self.label_files[index])], dtype=np.float32))
 
         return signal, label
 
