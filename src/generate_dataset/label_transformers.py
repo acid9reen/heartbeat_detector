@@ -40,12 +40,12 @@ class WaveTransformer(object):
 
         for peak_index in peaks_indexes:
 
-            if peak_index - half_window_size < 0:
+            if peak_index - half_window_size <= 0:
                 right_slice_boarder = peak_index + half_window_size
 
                 label[:right_slice_boarder] = sin[len(sin) - (right_slice_boarder):]
 
-            elif peak_index + half_window_size > len(label):
+            elif peak_index + half_window_size >= len(label):
                 left_slice_boarder = peak_index - half_window_size - 1
 
                 label[left_slice_boarder:] = sin[:len(label[left_slice_boarder:])]
