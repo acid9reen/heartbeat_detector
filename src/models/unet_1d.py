@@ -78,7 +78,10 @@ class UNet1d(nn.Module):
             4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier,
         )
         self._up4 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier)
-        self._output = nn.Conv1d(channel_multiplier, 1, kernel_size=1)
+        self._output = nn.Sequential(
+            nn.Conv1d(channel_multiplier, 1, kernel_size=1),
+            nn.Sigmoid(),
+        )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         x1 = self._input(X)

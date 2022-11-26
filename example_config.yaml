@@ -1,0 +1,31 @@
+dataset_config:
+  dataset_filepath: C:/Users/Ruslan/repos/lab/dataset/good_signals.csv
+  num_workers: 4
+  batch_size: 160
+  pin_memory: true
+
+
+optimizer_config:
+  optimizer_name: adam
+  learning_rate: 0.003
+  weight_decay: 0.0005
+
+scheduler_config:
+  milestones:
+    - 15
+    - 30
+    - 35
+    - 40
+  gamma: 0.2
+
+loss_config:
+  loss_name: mse
+
+output_config:
+  out_folder: out
+
+model_name: 'unet1d'
+
+epochs_num: 3
+save_step_size: 1
+device: cuda

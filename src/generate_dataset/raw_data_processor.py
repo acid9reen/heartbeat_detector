@@ -58,7 +58,7 @@ class RawDataProcessor:
         num_processes = num_processes or mp.cpu_count()
         select_results: list[SelectResult] = []
 
-        with mp.Pool(num_processes) as pool:
+        with mp.Pool(min(6, num_processes)) as pool:
             for select_result in tqdm(
                 pool.imap_unordered(
                     self._process_label_file,

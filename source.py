@@ -1,9 +1,19 @@
 import argparse
 import logging
+import os
 import random
 from typing import Callable
 
+import mlflow
+import numpy as np
+import torch
+
+from src.configs.train_config import read_config
 from src.generate_dataset import DatasetGenerator
+from src.generate_dataset.label_transformers import IdentityTransformer
+from src.generate_dataset.label_transformers import TriangleTransformer
+from src.generate_dataset.label_transformers import WaveTransformer
+from src.train.train import train
 
 
 LOG_FILE = 'debug.log'
@@ -24,6 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 Secs = int
+
+TRANSFORM_KEYS = {
+    'identity': IdentityTransformer(),
+    'sin': WaveTransformer(20),
+    'abs': TriangleTransformer(20),
+}
 
 
 class ParserNamespace(argparse.Namespace):
@@ -69,12 +85,24 @@ def parse_args() -> ParserNamespace:
     )
 
     generate_dataset_parser.add_argument(
+        '--label_transform',
+        type=str,
+        choices=['identity', 'sin', 'abs'],
+        help='Type of label transform',
+    )
+
+    generate_dataset_parser.add_argument(
         '--raw_data_root', help='Path to files to generate dataset from',
     )
 
     generate_dataset_parser.add_argument(
         '--output_folder', help='Location to store generated dataset',
     )
+
+    train_model_parser = subparsers.add_parser('train_model', help='Script to train model')
+    train_model_parser.add_argument('train_config_path', help='Path to train config .yaml file')
+
+    train_model_parser.set_defaults(action=train_model)
 
     generate_dataset_parser.set_defaults(action=generate_dataset)
 
@@ -88,6 +116,8 @@ def generate_dataset(args: ParserNamespace) -> None:
         args (ParserNamespace): Args for dataset generation
     """
 
+    seed_everything(args.random_seed)
+
     dataset_generator = DatasetGenerator(
         args.raw_data_root,
         args.trim_by,
@@ -95,7 +125,16 @@ def generate_dataset(args: ParserNamespace) -> None:
         args.output_folder,
     )
 
-    dataset_generator.generate()
+    dataset_generator.generate(TRANSFORM_KEYS[args.label_transform])
+
+
+def train_model(args: ParserNamespace) -> None:
+    config = read_config(args.train_config_path)
+
+    with mlflow.start_run():
+        seed_everything(args.random_seed)
+        mlflow.log_params(config.dict_repr)
+        train(config)
 
 
 def seed_everything(seed: int) -> None:
@@ -106,11 +145,17 @@ def seed_everything(seed: int) -> None:
     """
 
     random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True  # type: ignore
+    torch.backends.cudnn.benchmark = True  # type: ignore
+
     logger.info(f'Fix random seed with value: {seed}!')
 
 
 def main(args: ParserNamespace) -> int:
-    seed_everything(args.random_seed)
     args.action(args)
 
     return 0

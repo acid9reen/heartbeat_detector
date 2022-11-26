@@ -168,3 +168,10 @@ cython_debug/
 # Generated files
 *.npy
 *.csv
+*.pth
+
+# mlflow data
+mlruns/
+
+# Config files
+*.yaml
