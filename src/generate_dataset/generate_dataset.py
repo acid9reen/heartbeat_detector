@@ -114,7 +114,7 @@ class DatasetGenerator:
         return select_instructions
 
     def _save_select_results(self, select_results: list[SelectResult]) -> None:
-        header = ['x_file_path', 'y_file_path', 'num_peaks']
+        header = ['x_file_path', 'y_file_path', 'num_peaks', 'channel']
 
         with open(os.path.join(self.out_foder_path, 'dataset.csv'), 'w') as out:
             csv_writer = csv.writer(

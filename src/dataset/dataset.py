@@ -13,10 +13,13 @@ from torch.utils.data import Dataset
 Set = tuple[tuple, tuple]
 
 
-def read_dataset_file(dataset_file_path: str) -> tuple[list[str], list[str], list[int]]:
+def read_dataset_file(
+        dataset_file_path: str,
+) -> tuple[list[str], list[str], list[int], list[int]]:
     signal_files = []
     label_files = []
     num_peaks = []
+    channels = []
 
     with open(dataset_file_path, 'r') as dataset:
         csv_reader = csv.reader(
@@ -29,13 +32,14 @@ def read_dataset_file(dataset_file_path: str) -> tuple[list[str], list[str], lis
         __, *data = csv_reader
 
         for row in data:
-            signal_path, label_path, num_peaks_str = row
+            signal_path, label_path, num_peaks_str, channel_str = row
 
             signal_files.append(signal_path)
             label_files.append(label_path)
             num_peaks.append(int(num_peaks_str))
+            channels.append(int(channel_str))
 
-    return signal_files, label_files, num_peaks
+    return signal_files, label_files, num_peaks, channels
 
 
 class HeartbeatDataset(Dataset):
@@ -74,7 +78,7 @@ class HeartbeatDataloaders(object):
             pin_memory=pin_memory,
         )
 
-        signal_files, label_files, num_peaks = read_dataset_file(
+        signal_files, label_files, __, channels = read_dataset_file(
             dataset_file_path,
         )
 
@@ -83,23 +87,23 @@ class HeartbeatDataloaders(object):
             (self.signals_validation, self.labels_validation),
             (self.signals_test, self.labels_test),
         ) = self._train_validation_test_split(
-            signal_files, label_files, num_peaks,
+            signal_files, label_files, channels,
         )
 
     @staticmethod
     def _train_validation_test_split(
             signal_files: list[str],
             label_files: list[str],
-            num_peaks: list[int],
+            channels: list[int],
     ) -> tuple[Set, Set, Set]:
-        # NOTE: Treating num_peaks as labels in train_test_split()
+        # NOTE: Treating channels as labels in train_test_split()
         # for stratification by number of peaks
 
         signals_labels = list(zip(signal_files, label_files))
 
         try:
             signals_labels_train, signals_labels_test, num_peaks_train, __ = train_test_split(
-                signals_labels, num_peaks, test_size=0.2, stratify=num_peaks,
+                signals_labels, channels, test_size=0.2, stratify=channels,
             )
         except ValueError as e:
             print(

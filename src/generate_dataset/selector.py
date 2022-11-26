@@ -19,6 +19,7 @@ class SelectResult(NamedTuple):
     processed_signal_file_path: str
     processed_label_file_path: str
     peak_quantity: int
+    channel: int
 
 
 class Selector:
@@ -94,4 +95,5 @@ class Selector:
             os.path.join(self.processed_xs_path, sample_file_name),
             os.path.join(self.processed_ys_path, sample_file_name),
             len(selected_peaks),
+            select_instruction.channel_index,
         )
