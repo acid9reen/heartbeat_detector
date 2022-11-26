@@ -1,3 +1,5 @@
+from functools import partial
+
 import torch
 
 from .model_saver import ModelSaver
@@ -13,6 +15,7 @@ OPTIMIZERS = {
 
 LOSSES = {
     'mse': torch.nn.MSELoss,
+    'bce': partial(torch.nn.BCELoss, reduction='mean'),
 }
 
 

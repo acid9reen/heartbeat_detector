@@ -24,7 +24,7 @@ class SchedulerConfig(BaseModel):
 
 
 class LossConfig(BaseModel):
-    loss_name: Literal['mse']
+    loss_name: Literal['mse', 'bce']
 
 
 class OutputConfig(BaseModel):
