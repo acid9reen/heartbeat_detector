@@ -68,16 +68,12 @@ class UNet1d(nn.Module):
         self._down2 = UNetDown(2 * channel_multiplier, 4 * channel_multiplier)
         self._down3 = UNetDown(4 * channel_multiplier, 8 * channel_multiplier)
         self._down4 = UNetDown(8 * channel_multiplier, 16 * channel_multiplier)
-        self._up1 = UNetUp(
-            16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier,
-        )
-        self._up2 = UNetUp(
-            8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier,
-        )
-        self._up3 = UNetUp(
-            4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier,
-        )
+
+        self._up1 = UNetUp(16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier)
+        self._up2 = UNetUp(8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier)
+        self._up3 = UNetUp(4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier)
         self._up4 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier)
+
         self._output = nn.Sequential(
             nn.Conv1d(channel_multiplier, 1, kernel_size=1),
             nn.Sigmoid(),
