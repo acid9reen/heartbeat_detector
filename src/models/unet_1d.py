@@ -68,11 +68,15 @@ class UNet1d(nn.Module):
         self._down2 = UNetDown(2 * channel_multiplier, 4 * channel_multiplier)
         self._down3 = UNetDown(4 * channel_multiplier, 8 * channel_multiplier)
         self._down4 = UNetDown(8 * channel_multiplier, 16 * channel_multiplier)
+        self._down5 = UNetDown(16 * channel_multiplier, 32 * channel_multiplier)
+        self._down6 = UNetDown(32 * channel_multiplier, 64 * channel_multiplier)
 
-        self._up1 = UNetUp(16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier)
-        self._up2 = UNetUp(8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier)
-        self._up3 = UNetUp(4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier)
-        self._up4 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier)
+        self._up1 = UNetUp(64 * channel_multiplier, 32 * channel_multiplier, 32 * channel_multiplier)
+        self._up2 = UNetUp(32 * channel_multiplier, 16 * channel_multiplier, 16 * channel_multiplier)
+        self._up3 = UNetUp(16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier)
+        self._up4 = UNetUp(8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier)
+        self._up5 = UNetUp(4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier)
+        self._up6 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier)
 
         self._output = nn.Sequential(
             nn.Conv1d(channel_multiplier, 1, kernel_size=1),
@@ -84,11 +88,16 @@ class UNet1d(nn.Module):
         x2 = self._down1(x1)
         x3 = self._down2(x2)
         x4 = self._down3(x3)
-        x = self._down4(x4)
-        x = self._up1(x4, x)
-        x = self._up2(x3, x)
-        x = self._up3(x2, x)
-        x = self._up4(x1, x)
+        x5 = self._down4(x4)
+        x6 = self._down5(x5)
+        x = self._down6(x6)
+
+        x = self._up1(x6, x)
+        x = self._up2(x5, x)
+        x = self._up3(x4, x)
+        x = self._up4(x3, x)
+        x = self._up5(x2, x)
+        x = self._up6(x1, x)
 
         return self._output(x)
 
