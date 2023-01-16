@@ -62,6 +62,14 @@ class HeartbeatDataset(Dataset):
         return signal, label
 
 
+class HeartBeatDatasetWFilenames(HeartbeatDataset):
+    def __getitem__(self, index: int) -> tuple[str, torch.Tensor, torch.Tensor]:
+        signal, label = super().__getitem__(index)
+        filename = self.signal_files[index]
+
+        return filename, signal, label
+
+
 class HeartbeatDataloaders(object):
     def __init__(
             self,
@@ -128,9 +136,13 @@ class HeartbeatDataloaders(object):
 
         return train_set, validation_set, test_set
 
-    def _get_dataloader(self, signals: tuple[str], labels: tuple[str]) -> DataLoader:
+    def _get_dataloader(
+            self, signals: tuple[str],
+            labels: tuple[str],
+            dataset: type[HeartbeatDataset] = HeartbeatDataset,
+    ) -> DataLoader:
         return self.pre_tuned_dataloader(
-            HeartbeatDataset(signals, labels),
+            dataset(signals, labels),
         )
 
     def get_train_validation_test_dataloaders(
@@ -139,5 +151,7 @@ class HeartbeatDataloaders(object):
         return (
             self._get_dataloader(self.signals_train, self.labels_train),
             self._get_dataloader(self.signals_validation, self.labels_validation),
-            self._get_dataloader(self.signals_test, self.labels_test),
+            self._get_dataloader(
+                self.signals_test, self.labels_test, dataset=HeartBeatDatasetWFilenames,
+            ),
         )
