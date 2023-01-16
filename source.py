@@ -8,12 +8,12 @@ import mlflow
 import numpy as np
 import torch
 
-from src.configs.train_config import read_config
-from src.generate_dataset import DatasetGenerator
-from src.generate_dataset.label_transformers import IdentityTransformer
-from src.generate_dataset.label_transformers import TriangleTransformer
-from src.generate_dataset.label_transformers import WaveTransformer
-from src.train.train import train
+from heartbeat_detector.configs.train_config import read_config
+from heartbeat_detector.generate_dataset import DatasetGenerator
+from heartbeat_detector.generate_dataset.label_transformers import IdentityTransformer
+from heartbeat_detector.generate_dataset.label_transformers import TriangleTransformer
+from heartbeat_detector.generate_dataset.label_transformers import WaveTransformer
+from heartbeat_detector.train.train import train
 
 
 LOG_FILE = 'debug.log'

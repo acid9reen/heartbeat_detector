@@ -4,9 +4,9 @@ import torch
 
 from .model_saver import ModelSaver
 from .trainer import Trainer
-from src.configs.train_config import TrainConfig
-from src.dataset.dataset import HeartbeatDataloaders
-from src.models import UNet1d
+from heartbeat_detector.configs.train_config import TrainConfig
+from heartbeat_detector.dataset.dataset import HeartbeatDataloaders
+from heartbeat_detector.models import UNet1d
 
 
 OPTIMIZERS = {
