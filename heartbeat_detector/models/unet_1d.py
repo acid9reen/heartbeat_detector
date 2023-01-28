@@ -7,13 +7,32 @@ Secs = int
 
 
 class UNetConv(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int) -> None:
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            kernel_size: int = 9,
+            padding: int = 4,
+            stride: int = 1,
+    ) -> None:
         super().__init__()
         self._model = nn.Sequential(
-            nn.Conv1d(in_channels, out_channels, kernel_size=9, padding=4),
+            nn.Conv1d(
+                in_channels,
+                out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+            ),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(),
-            nn.Conv1d(out_channels, out_channels, kernel_size=9, padding=4),
+            nn.Conv1d(
+                out_channels,
+                out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+            ),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(),
         )
@@ -23,11 +42,24 @@ class UNetConv(nn.Module):
 
 
 class UNetDown(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int) -> None:
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            kernel_size: int = 9,
+            padding: int = 4,
+            stride: int = 1,
+    ) -> None:
         super().__init__()
         self._model = nn.Sequential(
             nn.MaxPool1d(2),
-            UNetConv(in_channels, out_channels),
+            UNetConv(
+                in_channels,
+                out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+            ),
         )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
@@ -40,14 +72,17 @@ class UNetUp(nn.Module):
             in_channels: int,
             in_channels_skip: int,
             out_channels: int,
+            kernel_size: int = 8,
+            padding: int = 3,
+            stride: int = 2,
     ) -> None:
         super(UNetUp, self).__init__()
         self._up = nn.ConvTranspose1d(
             in_channels,
             in_channels,
-            kernel_size=8,
-            stride=2,
-            padding=3,
+            kernel_size=kernel_size,
+            padding=padding,
+            stride=stride,
         )
         self._model = UNetConv(in_channels + in_channels_skip, out_channels)
 
