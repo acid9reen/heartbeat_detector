@@ -175,3 +175,6 @@ mlruns/
 
 # Config files
 *.yaml
+
+# Generated files
+out/

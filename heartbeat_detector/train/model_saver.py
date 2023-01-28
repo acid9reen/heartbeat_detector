@@ -1,4 +1,6 @@
 import os
+import shutil
+from pathlib import Path
 
 import mlflow
 import torch
@@ -6,7 +8,12 @@ from torch import nn
 
 
 class ModelSaver(object):
-    def __init__(self, out_folder: str, model_name: str) -> None:
+    def __init__(
+            self,
+            out_folder: str,
+            model_name: str,
+            model_implementation_path: Path,
+    ) -> None:
         run_name = ''
 
         if (active_run := mlflow.active_run()) is not None:
@@ -17,6 +24,11 @@ class ModelSaver(object):
         self.save_path_template = os.path.join(out_folder_with_run_name, model_name)
 
         os.makedirs(out_folder_with_run_name, exist_ok=True)
+
+        shutil.copy(
+            model_implementation_path,
+            os.path.join(out_folder, run_name, model_implementation_path.name),
+        )
 
     def save(self, model: nn.Module, epoch_no: int) -> None:
         epoch_specific_addon = f'_epoch_{epoch_no:03d}.pth'

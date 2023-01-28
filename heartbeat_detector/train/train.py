@@ -1,12 +1,14 @@
+import inspect
 from functools import partial
+from pathlib import Path
 
 import torch
 
-from .model_saver import ModelSaver
-from .trainer import Trainer
 from heartbeat_detector.configs.train_config import TrainConfig
 from heartbeat_detector.dataset.dataset import HeartbeatDataloaders
 from heartbeat_detector.models import UNet1d
+from heartbeat_detector.train.model_saver import ModelSaver
+from heartbeat_detector.train.trainer import Trainer
 
 
 OPTIMIZERS = {
@@ -57,6 +59,7 @@ def train(config: TrainConfig) -> None:
     model_saver = ModelSaver(
         config.output_config.out_folder,
         config.model_name,
+        Path(inspect.getfile(UNet1d)),
     )
 
     for epoch_no, model in enumerate(trainer.train(epochs_num), start=1):
