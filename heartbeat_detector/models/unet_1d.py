@@ -23,6 +23,7 @@ class UNetConv(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding,
                 stride=stride,
+                padding_mode='reflect',
             ),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(),
@@ -32,6 +33,7 @@ class UNetConv(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding,
                 stride=stride,
+                padding_mode='reflect',
             ),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(),
@@ -99,19 +101,19 @@ class UNet1d(nn.Module):
         super().__init__()
 
         self._input = UNetConv(1, channel_multiplier)
-        self._down1 = UNetDown(channel_multiplier, 2 * channel_multiplier)
-        self._down2 = UNetDown(2 * channel_multiplier, 4 * channel_multiplier)
-        self._down3 = UNetDown(4 * channel_multiplier, 8 * channel_multiplier)
-        self._down4 = UNetDown(8 * channel_multiplier, 16 * channel_multiplier)
-        self._down5 = UNetDown(16 * channel_multiplier, 32 * channel_multiplier)
-        self._down6 = UNetDown(32 * channel_multiplier, 64 * channel_multiplier)
+        self._down1 = UNetDown(channel_multiplier, 2 * channel_multiplier, 17, 8)
+        self._down2 = UNetDown(2 * channel_multiplier, 4 * channel_multiplier, 17, 8)
+        self._down3 = UNetDown(4 * channel_multiplier, 8 * channel_multiplier, 29, 14)
+        self._down4 = UNetDown(8 * channel_multiplier, 16 * channel_multiplier, 29, 14)
+        self._down5 = UNetDown(16 * channel_multiplier, 32 * channel_multiplier, 29, 14)
+        self._down6 = UNetDown(32 * channel_multiplier, 64 * channel_multiplier, 41, 20)
 
         self._up1 = UNetUp(64 * channel_multiplier, 32 * channel_multiplier, 32 * channel_multiplier)
-        self._up2 = UNetUp(32 * channel_multiplier, 16 * channel_multiplier, 16 * channel_multiplier)
-        self._up3 = UNetUp(16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier)
-        self._up4 = UNetUp(8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier)
-        self._up5 = UNetUp(4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier)
-        self._up6 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier)
+        self._up2 = UNetUp(32 * channel_multiplier, 16 * channel_multiplier, 16 * channel_multiplier, 14, 6)
+        self._up3 = UNetUp(16 * channel_multiplier, 8 * channel_multiplier, 8 * channel_multiplier, 14, 6)
+        self._up4 = UNetUp(8 * channel_multiplier, 4 * channel_multiplier, 4 * channel_multiplier, 22, 10)
+        self._up5 = UNetUp(4 * channel_multiplier, 2 * channel_multiplier, 2 * channel_multiplier, 22, 10)
+        self._up6 = UNetUp(2 * channel_multiplier, channel_multiplier, channel_multiplier, 30, 14)
 
         self._output = nn.Sequential(
             nn.Conv1d(channel_multiplier, 1, kernel_size=1),
