@@ -1,14 +1,11 @@
 import argparse
 import logging
-import os
-import random
 
 import mlflow
-import numpy as np
-import torch
 
 from heartbeat_detector.configs.train_config import read_config
 from heartbeat_detector.train.train import train
+from heartbeat_detector.utils import seed_everything
 
 
 LOG_FILE = 'debug.log'
@@ -31,12 +28,12 @@ logger = logging.getLogger(__name__)
 Secs = int
 
 
-class ParserNamespace(argparse.Namespace):
+class TrainModelNamespace(argparse.Namespace):
     random_seed: int = 420
     train_config_path: str
 
 
-def parse_args() -> ParserNamespace:
+def parse_train_model_args() -> TrainModelNamespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -45,29 +42,11 @@ def parse_args() -> ParserNamespace:
 
     parser.add_argument('train_config_path', help='Path to train config .yaml file')
 
-    return parser.parse_args(namespace=ParserNamespace())
-
-
-def seed_everything(seed: int) -> None:
-    """Fix seed for random generators
-
-    Args:
-        seed (int): fixed seed
-    """
-
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True  # type: ignore
-    torch.backends.cudnn.benchmark = True  # type: ignore
-
-    logger.info(f'Fix random seed with value: {seed}!')
+    return parser.parse_args(namespace=TrainModelNamespace())
 
 
 def main() -> int:
-    args = parse_args()
+    args = parse_train_model_args()
 
     config = read_config(args.train_config_path)
 
@@ -80,4 +59,4 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

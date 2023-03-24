@@ -3,7 +3,7 @@ from pathlib import Path
 
 import torch
 
-# from heartbeat_detector.models.unet_1d import UNet1d
+from heartbeat_detector.models.unet_1d import UNet1d
 
 
 class Torch2OnnxNamespace(argparse.Namespace):
@@ -36,7 +36,7 @@ def parse_args() -> Torch2OnnxNamespace:
         default=10_000,
     )
 
-    return parser.parse_args(namespace=Torch2OnnxNamespace)
+    return parser.parse_args(namespace=Torch2OnnxNamespace())
 
 
 def main() -> int:
