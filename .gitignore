@@ -178,3 +178,6 @@ mlruns/
 
 # Generated files
 out/
+
+# Models
+*.onnx
