@@ -29,9 +29,9 @@ def read_dataset_file(
         )
 
         # Skip header
-        __, *data = csv_reader
+        next(csv_reader)
 
-        for row in data:
+        for row in csv_reader:
             signal_path, label_path, num_peaks_str, channel_str = row
 
             signal_files.append(signal_path)
