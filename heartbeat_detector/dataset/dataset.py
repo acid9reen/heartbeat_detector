@@ -1,52 +1,68 @@
 import csv
+import logging
 import multiprocessing as mp
-import sys
+import random
+from collections import defaultdict
 from functools import partial
+from math import floor
+from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 import torch
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
 
-Set = tuple[tuple, tuple]
+logger = logging.getLogger(__name__)
 
 
-def read_dataset_file(
-        dataset_file_path: str,
-) -> tuple[list[str], list[str], list[int], list[int]]:
-    signal_files = []
-    label_files = []
-    num_peaks = []
-    channels = []
+def read_dataset_file(dataset_file_path: str) -> dict[str, list[dict[str, str]]]:
+    """Read dataset file, store all dataset file rows in dict of lists,
+    for now dict keys are:
+        `x_file_path`,
+        `y_file_path`,
+        `num_peaks`,
+        `channel`,
 
-    with open(dataset_file_path, 'r') as dataset:
-        csv_reader = csv.reader(
-            dataset,
+    Parameters
+    ----------
+    dataset_file_path : str
+        Path to .csv dataset file
+
+    Returns
+    -------
+    dataset : dict[str, list[dict[str, str]]]
+        Dataset dict with keys storing casefolded original label file stem and
+        values storing rows of the dataset
+    """
+
+    dataset: dict[str, list[dict[str, str]]] = defaultdict(list)
+
+    with open(dataset_file_path, 'r') as dataset_file:
+        csv_reader = csv.DictReader(
+            dataset_file,
             delimiter=',',
             quotechar='"',
         )
 
-        # Skip header
-        next(csv_reader)
-
         for row in csv_reader:
-            signal_path, label_path, num_peaks_str, channel_str = row
+            # Get label file stem, for example, `Y_22_ph1_15_1621814_1631813`
+            # and get only three first strings, separated by `_`: `Y_22_ph1`,
+            # that is the original label file stem
+            label_filename = '_'.join(Path(row['y_file_path']).stem.split('_')[:3]).casefold()
+            dataset[label_filename].append(row)
 
-            signal_files.append(signal_path)
-            label_files.append(label_path)
-            num_peaks.append(int(num_peaks_str))
-            channels.append(int(channel_str))
+    logger.info(f'Find {len(dataset.keys())} folds in dataset, they are {", ".join(dataset.keys())}')
 
-    return signal_files, label_files, num_peaks, channels
+    return dataset
 
 
 class HeartbeatDataset(Dataset):
     def __init__(
             self,
-            signal_files: tuple[str],
-            label_files: tuple[str],
+            signal_files: list[str],
+            label_files: list[str],
     ) -> None:
         super().__init__()
         self.signal_files = signal_files
@@ -74,8 +90,10 @@ class HeartbeatDataloaders(object):
     def __init__(
             self,
             dataset_file_path: str,
+            test_folds: Iterable[str],
             batch_size: int = 120,
             num_workers: int = mp.cpu_count() // 2,
+            validation_split_ratio: float = 0.2,
             *,
             pin_memory: bool = True,
     ) -> None:
@@ -86,72 +104,63 @@ class HeartbeatDataloaders(object):
             pin_memory=pin_memory,
         )
 
-        signal_files, label_files, __, channels = read_dataset_file(
-            dataset_file_path,
+        self.dataset = read_dataset_file(dataset_file_path)
+        self.test_folds = set(map(str.casefold, test_folds))
+        train_validation_folds = set(self.dataset.keys()) - self.test_folds
+
+        self.validation_folds = set(
+            random.sample(
+                list(train_validation_folds),
+                max(floor(len(train_validation_folds) * validation_split_ratio), 1),
+            ),
         )
 
-        (
-            (self.signals_train, self.labels_train),
-            (self.signals_validation, self.labels_validation),
-            (self.signals_test, self.labels_test),
-        ) = self._train_validation_test_split(
-            signal_files, label_files, channels,
-        )
+        self.train_folds = train_validation_folds - self.validation_folds
 
-    @staticmethod
-    def _train_validation_test_split(
-            signal_files: list[str],
-            label_files: list[str],
-            channels: list[int],
-    ) -> tuple[Set, Set, Set]:
-        # NOTE: Treating channels as labels in train_test_split()
-        # for stratification by number of peaks
+        logger.info('Done splitting data')
+        logger.info(f'Train folds: {", ".join(self.train_folds)}')
+        logger.info(f'Validation folds: {", ".join(self.validation_folds)}')
+        logger.info(f'Test folds: {", ".join(self.test_folds)}')
 
-        signals_labels = list(zip(signal_files, label_files))
+    def _get_signals_labels_from_dataset(
+            self,
+            folds: Iterable[str],
+    ) -> tuple[list[str], list[str]]:
+        filtered_rows = []
 
-        try:
-            signals_labels_train, signals_labels_test, num_peaks_train, __ = train_test_split(
-                signals_labels, channels, test_size=0.2, stratify=channels,
-            )
-        except ValueError as e:
-            print(
-                'Possible reason is poor quality data, '
-                'remove rows with unique num_peaks values '
-                'and try again',
-                file=sys.stderr,
-            )
+        for fold in folds:
+            filtered_rows.extend(self.dataset[fold])
 
-            raise e
+        signals = [row['x_file_path'] for row in filtered_rows]
+        labels = [row['y_file_path'] for row in filtered_rows]
 
-        signals_labels_train, signals_labels_validation, __, __ = train_test_split(
-            signals_labels_train,
-            num_peaks_train,
-            test_size=0.25,
-            stratify=num_peaks_train,
-        )
-
-        train_set = tuple(zip(*signals_labels_train))
-        validation_set = tuple(zip(*signals_labels_validation))
-        test_set = tuple(zip(*signals_labels_test))
-
-        return train_set, validation_set, test_set
+        return signals, labels
 
     def _get_dataloader(
-            self, signals: tuple[str],
-            labels: tuple[str],
+            self,
+            signals: list[str],
+            labels: list[str],
             dataset: type[HeartbeatDataset] = HeartbeatDataset,
     ) -> DataLoader:
         return self.pre_tuned_dataloader(
             dataset(signals, labels),
         )
 
-    def get_train_validation_test_dataloaders(
-            self,
-    ) -> tuple[DataLoader, DataLoader, DataLoader]:
-        return (
-            self._get_dataloader(self.signals_train, self.labels_train),
-            self._get_dataloader(self.signals_validation, self.labels_validation),
-            self._get_dataloader(
-                self.signals_test, self.labels_test, dataset=HeartBeatDatasetWFilenames,
-            ),
+    def get_train_validation_dataloaders(self) -> tuple[DataLoader, DataLoader]:
+        signals_train, labels_train = self._get_signals_labels_from_dataset(self.train_folds)
+        signals_validation, labels_validation = self._get_signals_labels_from_dataset(self.validation_folds)
+
+        logger.info(
+            f'There are {len(signals_train)} train samples '
+            f'and {len(signals_validation)} validation samples',
         )
+
+        return (
+            self._get_dataloader(signals_train, labels_train),
+            self._get_dataloader(signals_validation, labels_validation),
+        )
+
+    def get_test_dataloader(self) -> DataLoader:
+        signals, labels = self._get_signals_labels_from_dataset(self.test_folds)
+
+        return self._get_dataloader(signals, labels, HeartBeatDatasetWFilenames)

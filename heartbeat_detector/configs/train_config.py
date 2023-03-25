@@ -7,6 +7,8 @@ from pydantic import BaseModel
 
 class DatasetConfig(BaseModel):
     dataset_filepath: str
+    test_folds: list[str]
+    validation_split_ratio: float
     num_workers: int
     batch_size: int
     pin_memory: bool
