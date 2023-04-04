@@ -1,5 +1,5 @@
 dataset_config:
-  dataset_filepath: C:/Users/Ruslan/repos/lab/dataset/good_signals.csv
+  dataset_filepath: /signals.csv
   test_folds:
     - Y_25_ph0
   num_workers: 4
