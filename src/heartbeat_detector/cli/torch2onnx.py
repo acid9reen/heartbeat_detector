@@ -2,7 +2,6 @@ import argparse
 from pathlib import Path
 
 import torch
-
 from heartbeat_detector.models.unet_1d import UNet1d
 
 

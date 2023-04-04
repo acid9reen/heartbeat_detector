@@ -2,7 +2,6 @@ import argparse
 import logging
 
 import mlflow
-
 from heartbeat_detector.configs.train_config import read_config
 from heartbeat_detector.train.train import train
 from heartbeat_detector.utils import seed_everything

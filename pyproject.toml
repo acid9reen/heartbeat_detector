@@ -34,9 +34,6 @@ dev = [
     "pre-commit >= 2.21.0",
 ]
 
-[tool.setuptools.packages]
-find = {}
-
 [project.scripts]
 train_model = "heartbeat_detector.cli.train_model:main"
 torch2onnx = "heartbeat_detector.cli.torch2onnx:main"

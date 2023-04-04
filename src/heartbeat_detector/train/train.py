@@ -3,7 +3,6 @@ from functools import partial
 from pathlib import Path
 
 import torch
-
 from heartbeat_detector.configs.train_config import TrainConfig
 from heartbeat_detector.dataset.dataset import HeartbeatDataloaders
 from heartbeat_detector.models import UNet1d
