@@ -36,4 +36,5 @@ dev = [
 
 [project.scripts]
 train_model = "heartbeat_detector.cli.train_model:main"
+test_model = "heartbeat_detector.cli.test_model:main"
 torch2onnx = "heartbeat_detector.cli.torch2onnx:main"
