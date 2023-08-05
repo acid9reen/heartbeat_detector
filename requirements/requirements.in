@@ -1,9 +1,0 @@
-matplotlib
-mlflow
-notebook
-numpy
-scikit-learn
-torch
-torchinfo
-torchvision
-tqdm

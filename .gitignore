@@ -174,4 +174,11 @@ cython_debug/
 mlruns/
 
 # Config files
-*.yaml
+**/*.yaml
+!.example.config.yaml
+
+# Generated files
+out/
+
+# Models
+*.onnx

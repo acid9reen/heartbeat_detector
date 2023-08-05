@@ -1,12 +1,13 @@
+import inspect
 from functools import partial
+from pathlib import Path
 
 import torch
-
-from .model_saver import ModelSaver
-from .trainer import Trainer
-from src.configs.train_config import TrainConfig
-from src.dataset.dataset import HeartbeatDataloaders
-from src.models import UNet1d
+from heartbeat_detector.configs.train_config import TrainConfig
+from heartbeat_detector.dataset.dataset import HeartbeatDataloaders
+from heartbeat_detector.models import UNet1d
+from heartbeat_detector.train.model_saver import ModelSaver
+from heartbeat_detector.train.trainer import Trainer
 
 
 OPTIMIZERS = {
@@ -20,12 +21,14 @@ LOSSES = {
 
 
 def train(config: TrainConfig) -> None:
-    train_dataloader, validation_dataloader, __ = HeartbeatDataloaders(
+    train_dataloader, validation_dataloader = HeartbeatDataloaders(
         config.dataset_config.dataset_filepath,
+        config.dataset_config.test_folds,
         config.dataset_config.batch_size,
         config.dataset_config.num_workers,
+        config.dataset_config.validation_split_ratio,
         pin_memory=config.dataset_config.pin_memory,
-    ).get_train_validation_test_dataloaders()
+    ).get_train_validation_dataloaders()
 
     model = UNet1d()
     optimizer = OPTIMIZERS[config.optimizer_config.optimizer_name](
@@ -57,6 +60,7 @@ def train(config: TrainConfig) -> None:
     model_saver = ModelSaver(
         config.output_config.out_folder,
         config.model_name,
+        Path(inspect.getfile(UNet1d)),
     )
 
     for epoch_no, model in enumerate(trainer.train(epochs_num), start=1):

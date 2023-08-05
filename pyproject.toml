@@ -1,0 +1,40 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools", "wheel"]  # PEP 508 specifications.
+
+[project]
+name = "heartbeat_detector"
+authors = [
+    {name = "Ruslan Smirnov"},
+    {name = "Anton Rybkin"},
+]
+description = "Set of scripts to detect heartbeat"
+readme = "README.md"
+version = "0.1"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib >= 3.6.0",
+    "mlflow >= 2.0.1",
+    "numpy < 1.24.0",  # ng cause mlflow install numba, which is incompatible with numpy >= 1.24
+    "pydantic >= 1.10.4",
+    "scikit-learn >= 1.1.3",
+    "torch >= 1.13.1",
+    "torchinfo >= 1.7.1",
+    "torchvision >= 0.14.0",
+    "tqdm >= 4.64.1",
+]
+
+[project.optional-dependencies]
+notebook = [
+    "notebook >= 6.4.12",
+    "pandas >= 1.5.2",
+]
+dev = [
+    "flake8 >= 6.0.0",
+    "pre-commit >= 2.21.0",
+]
+
+[project.scripts]
+train_model = "heartbeat_detector.cli.train_model:main"
+test_model = "heartbeat_detector.cli.test_model:main"
+torch2onnx = "heartbeat_detector.cli.torch2onnx:main"
