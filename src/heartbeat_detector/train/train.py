@@ -5,6 +5,8 @@ from pathlib import Path
 import torch
 from heartbeat_detector.configs.train_config import TrainConfig
 from heartbeat_detector.dataset.dataset import HeartbeatDataloaders
+from heartbeat_detector.losses.dice import BceDiceLoss
+from heartbeat_detector.losses.dice import DiceLoss
 from heartbeat_detector.models import UNet1d
 from heartbeat_detector.train.model_saver import ModelSaver
 from heartbeat_detector.train.trainer import Trainer
@@ -17,6 +19,8 @@ OPTIMIZERS = {
 LOSSES = {
     'mse': torch.nn.MSELoss,
     'bce': partial(torch.nn.BCELoss, reduction='mean'),
+    'dice': DiceLoss,
+    'bce_dice': BceDiceLoss,
 }
 
 

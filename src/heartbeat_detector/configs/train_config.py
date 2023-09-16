@@ -26,7 +26,7 @@ class SchedulerConfig(BaseModel):
 
 
 class LossConfig(BaseModel):
-    loss_name: Literal['mse', 'bce']
+    loss_name: Literal['mse', 'bce', 'dice', 'bce_dice']
 
 
 class OutputConfig(BaseModel):
@@ -54,6 +54,7 @@ class TrainConfig(BaseModel):
             'scheduler_milestones': self.scheduler_config.milestones,
             'scheduler_gamma': self.scheduler_config.gamma,
             'loss': self.loss_config.loss_name,
+            'test_folds': self.dataset_config.test_folds,
         }
 
 
