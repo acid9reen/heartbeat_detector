@@ -1,10 +1,13 @@
 dataset_config:
-  dataset_filepath: /signals.csv
+  dataset_filepath: "dataset.csv"
   test_folds:
-    - Y_25_ph0
-  num_workers: 4
-  validation_split_ratio: 0.2
-  batch_size: 160
+    - fold_1
+  validation_folds:
+    - fold_2
+  exclude_folds:
+    - fold_3
+  num_workers: 6
+  batch_size: 120
   pin_memory: true
 
 

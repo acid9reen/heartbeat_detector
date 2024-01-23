@@ -72,7 +72,7 @@ def main() -> int:
     test_dataloader = HeartbeatDataloaders(
         args.dataset_path.as_posix(),
         args.test_folds.split(','),
-        args.batch_size,
+        batch_size=args.batch_size,
         num_workers=1,
     ).get_test_dataloader()
 

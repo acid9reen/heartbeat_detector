@@ -91,9 +91,10 @@ class HeartbeatDataloaders(object):
             self,
             dataset_file_path: str,
             test_folds: Iterable[str],
+            validation_folds: set[str] = set(),
+            exclude_folds: set[str] = set(),
             batch_size: int = 120,
             num_workers: int = mp.cpu_count() // 2,
-            validation_split_ratio: float = 0.2,
             *,
             pin_memory: bool = True,
     ) -> None:
@@ -106,16 +107,14 @@ class HeartbeatDataloaders(object):
 
         self.dataset = read_dataset_file(dataset_file_path)
         self.test_folds = set(map(str.casefold, test_folds))
-        train_validation_folds = set(self.dataset.keys()) - self.test_folds
-
-        self.validation_folds = set(
-            random.sample(
-                list(train_validation_folds),
-                max(floor(len(train_validation_folds) * validation_split_ratio), 1),
-            ),
+        self.validation_folds = set(map(str.casefold, validation_folds))
+        self.exclude_folds = set(map(str.casefold, exclude_folds))
+        self.train_folds = (
+            set(map(str.casefold, self.dataset.keys()))
+            - self.test_folds
+            - self.validation_folds
+            - self.exclude_folds
         )
-
-        self.train_folds = train_validation_folds - self.validation_folds
 
         logger.info('Done splitting data')
         logger.info(f'Train folds: {", ".join(self.train_folds)}')

@@ -4,6 +4,7 @@ import mlflow
 import numpy as np
 import torch
 from heartbeat_detector.types import Devices
+from heartbeat_detector.losses.dice import BceDiceLoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -21,7 +22,7 @@ class TestModel(object):
         self.model = model
         self.dataloader = test_dataloader
         self.device = device
-        self.loss = torch.nn.BCELoss(reduction='mean')
+        self.loss = BceDiceLoss()
 
     def _test_loop(self) -> float:
         running_loss = .0
