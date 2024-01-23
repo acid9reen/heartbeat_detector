@@ -36,7 +36,7 @@ def parse_train_model_args() -> TrainModelNamespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--random_seed', help='Fixed random seed',
+        '--random_seed', type=int, help='Fixed random seed',
     )
 
     parser.add_argument('train_config_path', help='Path to train config .yaml file')
