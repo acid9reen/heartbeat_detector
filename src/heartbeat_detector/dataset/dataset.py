@@ -1,12 +1,10 @@
 import csv
 import logging
 import multiprocessing as mp
-import random
 from collections import defaultdict
 from functools import partial
-from math import floor
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, TypedDict
 
 import numpy as np
 import torch
@@ -17,7 +15,17 @@ from torch.utils.data import Dataset
 logger = logging.getLogger(__name__)
 
 
-def read_dataset_file(dataset_file_path: str) -> dict[str, list[dict[str, str]]]:
+class Stage3Schema(TypedDict):
+    signal: str
+    label: str
+    experiment: str
+    channel: int
+
+
+STAGE3_FIELDNAMES = sorted(list(Stage3Schema.__required_keys__))
+
+
+def read_dataset_file(dataset_file_path: str) -> dict[str, list[Stage3Schema]]:
     """Read dataset file, store all dataset file rows in dict of lists,
     for now dict keys are:
         `x_file_path`,
@@ -37,20 +45,20 @@ def read_dataset_file(dataset_file_path: str) -> dict[str, list[dict[str, str]]]
         values storing rows of the dataset
     """
 
-    dataset: dict[str, list[dict[str, str]]] = defaultdict(list)
+    dataset: dict[str, list[Stage3Schema]] = defaultdict(list)
 
-    with open(dataset_file_path, 'r') as dataset_file:
+    with open(dataset_file_path, 'r', newline="") as dataset_file:
         csv_reader = csv.DictReader(
             dataset_file,
-            delimiter=',',
-            quotechar='"',
+            fieldnames=STAGE3_FIELDNAMES,
         )
 
-        for row in csv_reader:
-            # Get label file stem, for example, `Y_22_ph1_15_1621814_1631813`
-            # and get only three first strings, separated by `_`: `Y_22_ph1`,
-            # that is the original label file stem
-            label_filename = '_'.join(Path(row['y_file_path']).stem.split('_')[:3]).casefold()
+        # Skip header
+        _ = next(csv_reader)
+
+        row: Stage3Schema
+        for row in csv_reader:  # type: ignore
+            label_filename = row["experiment"]
             dataset[label_filename].append(row)
 
     logger.info(f'Find {len(dataset.keys())} folds in dataset, they are {", ".join(dataset.keys())}')
@@ -73,7 +81,11 @@ class HeartbeatDataset(Dataset):
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         signal = torch.from_numpy(np.array([np.load(self.signal_files[index])], dtype=np.float32))
-        label = torch.from_numpy(np.array([np.load(self.label_files[index])], dtype=np.float32))
+        label = torch.from_numpy(
+            np.clip(
+                np.array([np.load(self.label_files[index])], dtype=np.float32), 0, 1
+            )
+        )
 
         return signal, label
 
@@ -105,6 +117,8 @@ class HeartbeatDataloaders(object):
             pin_memory=pin_memory,
         )
 
+        self.dataset_root = Path(dataset_file_path).parent
+
         self.dataset = read_dataset_file(dataset_file_path)
         self.test_folds = set(map(str.casefold, test_folds))
         self.validation_folds = set(map(str.casefold, validation_folds))
@@ -125,13 +139,13 @@ class HeartbeatDataloaders(object):
             self,
             folds: Iterable[str],
     ) -> tuple[list[str], list[str]]:
-        filtered_rows = []
+        filtered_rows: list[Stage3Schema] = []
 
         for fold in folds:
             filtered_rows.extend(self.dataset[fold])
 
-        signals = [row['x_file_path'] for row in filtered_rows]
-        labels = [row['y_file_path'] for row in filtered_rows]
+        signals = [(self.dataset_root / row['signal']).as_posix() for row in filtered_rows]
+        labels = [(self.dataset_root / row['label']).as_posix() for row in filtered_rows]
 
         return signals, labels
 
