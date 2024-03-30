@@ -139,4 +139,4 @@ class UNet1d(nn.Module):
 if __name__ == '__main__':
     from torchinfo import summary
 
-    print(summary(UNet1d(), input_size=(1, 1, 5000)))
+    print(summary(UNet1d(), input_size=(1, 1, 10_000)))
