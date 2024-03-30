@@ -182,3 +182,5 @@ out/
 
 # Models
 *.onnx
+*.pt
+*.zip
