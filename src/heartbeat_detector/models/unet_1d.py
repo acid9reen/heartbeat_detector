@@ -3,9 +3,6 @@ from torch import nn
 from torch.nn import functional as F
 
 
-Secs = int
-
-
 class UNetConv(nn.Module):
     def __init__(
             self,
