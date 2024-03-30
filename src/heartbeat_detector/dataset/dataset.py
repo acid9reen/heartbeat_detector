@@ -58,7 +58,7 @@ def read_dataset_file(dataset_file_path: str) -> dict[str, list[Stage3Schema]]:
 
         row: Stage3Schema
         for row in csv_reader:  # type: ignore
-            label_filename = row["experiment"]
+            label_filename = row["experiment"].strip().casefold()
             dataset[label_filename].append(row)
 
     logger.info(f'Find {len(dataset.keys())} folds in dataset, they are {", ".join(dataset.keys())}')
